@@ -104,10 +104,10 @@ export default async function Home() {
                         })}
                       </div>
                     )}
-                    {item.image && (
+                    {item.image && item.image.asset && (
                       <div className='relative h-48'>
                         <Image
-                          src={urlFor(item.image as any).url()}
+                          src={urlFor(item.image.asset).url()}
                           alt={item.title || 'Itinerary item'}
                           fill
                           className='object-cover'
