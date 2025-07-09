@@ -25,7 +25,6 @@ export function formatSanityDateTime(
     timeZone: 'America/Los_Angeles', // <--- Force UTC!
     ...options,
   };
-  console.log('time', date.toLocaleTimeString('en-US', defaultOptions));
   return date.toLocaleTimeString('en-US', defaultOptions);
 }
 
@@ -38,7 +37,6 @@ export function formatSanityDate(
   options?: Intl.DateTimeFormatOptions
 ) {
   if (!dateString) return '';
-  console.log('dateString', dateString);
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return '';
   const defaultOptions: Intl.DateTimeFormatOptions = {
