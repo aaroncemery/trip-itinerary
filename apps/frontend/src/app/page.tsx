@@ -8,6 +8,7 @@ import {
   formatSanityDateTime,
 } from '@/lib/utils';
 import { compareAsc } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 async function fetchPageData() {
   return await sanityFetch({
@@ -33,13 +34,16 @@ export default async function Home() {
         return compareAsc(dateA, dateB);
       });
 
-    // Group items by date
+    // Group items by date in LA timezone
     const groupedByDate = itemsWithDates.reduce(
       (acc, item) => {
         const date = parseSanityDate(item.date);
         if (!date) return acc;
 
-        const dateKey = date.toDateString(); // Use date string for grouping
+        // Convert to LA timezone for proper grouping
+        const localDate = toZonedTime(date, 'America/Los_Angeles');
+        const dateKey = localDate.toDateString();
+
         if (!acc[dateKey]) {
           acc[dateKey] = [];
         }
@@ -118,7 +122,6 @@ export default async function Home() {
                           src={urlFor(item.image.asset).url()}
                           alt={item.title || 'Itinerary item'}
                           fill
-                          sizes='300px'
                           className='object-cover'
                         />
                       </div>
