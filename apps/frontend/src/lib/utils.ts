@@ -14,12 +14,13 @@ export function formatSanityDateTime(
   options?: Intl.DateTimeFormatOptions
 ) {
   if (!dateString) return '';
-  const date = new Date(dateString); // No 'Z' appended!
+  const date = new Date(dateString);
   if (isNaN(date.getTime())) return '';
   const defaultOptions: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
+    timeZone: 'UTC', // <--- Force UTC!
     ...options,
   };
   return date.toLocaleTimeString('en-US', defaultOptions);
@@ -34,13 +35,14 @@ export function formatSanityDate(
   options?: Intl.DateTimeFormatOptions
 ) {
   if (!dateString) return '';
-  const date = new Date(dateString); // No 'Z' appended!
+  const date = new Date(dateString);
   if (isNaN(date.getTime())) return '';
   const defaultOptions: Intl.DateTimeFormatOptions = {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: 'UTC', // <--- Force UTC!
     ...options,
   };
   return date.toLocaleDateString('en-US', defaultOptions);
