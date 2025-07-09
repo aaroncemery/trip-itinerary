@@ -90,51 +90,53 @@ export default async function Home() {
                 })}
               </h2>
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-                {groupedByDate[date].map((item, index) => (
-                  <div
-                    key={`${item.date}-${index}`}
-                    className='bg-white rounded-lg shadow-lg overflow-hidden relative'
-                  >
-                    {item.date && (
-                      <div className='absolute top-4 left-4 z-10 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg'>
-                        {new Date(item.date).toLocaleTimeString('en-US', {
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true,
-                        })}
-                      </div>
-                    )}
-                    {item.image && item.image.asset && (
-                      <div className='relative h-48'>
-                        <Image
-                          src={urlFor(item.image.asset).url()}
-                          alt={item.title || 'Itinerary item'}
-                          fill
-                          className='object-cover'
-                        />
-                      </div>
-                    )}
-                    <div className='p-6'>
-                      <h3 className='text-xl font-semibold mb-2 text-indigo-950'>
-                        {item.title}
-                      </h3>
-                      <p className='text-gray-600 mb-2'>{item.description}</p>
-                      {item.map && (
-                        <p className='text-sm text-gray-500'>
-                          📍{' '}
-                          <a
-                            href={`https://maps.google.com/maps?q=${item.map.lat},${item.map.lng}`}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='underline hover:text-indigo-600'
-                          >
-                            Open in Google Maps
-                          </a>
-                        </p>
+                {groupedByDate[date].map((item, index) => {
+                  return (
+                    <div
+                      key={`${item.date}-${index}`}
+                      className='bg-white rounded-lg shadow-lg overflow-hidden relative'
+                    >
+                      {item.date && (
+                        <div className='absolute top-4 left-4 z-10 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg'>
+                          {new Date(item.date).toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true,
+                          })}
+                        </div>
                       )}
+                      {item.image && item.image.asset && (
+                        <div className='relative h-48'>
+                          <Image
+                            src={urlFor(item.image.asset).url()}
+                            alt={item.title || 'Itinerary item'}
+                            fill
+                            className='object-cover'
+                          />
+                        </div>
+                      )}
+                      <div className='p-6'>
+                        <h3 className='text-xl font-semibold mb-2 text-indigo-950'>
+                          {item.title}
+                        </h3>
+                        <p className='text-gray-600 mb-2'>{item.description}</p>
+                        {item.map && (
+                          <p className='text-sm text-gray-500'>
+                            📍{' '}
+                            <a
+                              href={`https://maps.google.com/maps?q=${item.map.lat},${item.map.lng}`}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='underline hover:text-indigo-600'
+                            >
+                              Open in Google Maps
+                            </a>
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
