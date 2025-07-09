@@ -14,15 +14,18 @@ export function formatSanityDateTime(
   options?: Intl.DateTimeFormatOptions
 ) {
   if (!dateString) return '';
+  // log out date to see if it's in UTC
+  console.log('dateString', dateString);
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return '';
   const defaultOptions: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-    timeZone: 'UTC', // <--- Force UTC!
+    timeZone: 'America/Los_Angeles', // <--- Force UTC!
     ...options,
   };
+  console.log('time', date.toLocaleTimeString('en-US', defaultOptions));
   return date.toLocaleTimeString('en-US', defaultOptions);
 }
 
@@ -35,6 +38,7 @@ export function formatSanityDate(
   options?: Intl.DateTimeFormatOptions
 ) {
   if (!dateString) return '';
+  console.log('dateString', dateString);
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return '';
   const defaultOptions: Intl.DateTimeFormatOptions = {
@@ -42,7 +46,7 @@ export function formatSanityDate(
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-    timeZone: 'UTC', // <--- Force UTC!
+    timeZone: 'America/Los_Angeles', // <--- Force UTC!
     ...options,
   };
   return date.toLocaleDateString('en-US', defaultOptions);
