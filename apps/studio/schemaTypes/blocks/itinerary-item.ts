@@ -28,6 +28,9 @@ export const itineraryItem = defineType({
       name: 'date',
       type: 'datetime',
       title: 'Date',
+      options: {
+        displayTimeZone: 'America/Los_Angeles',
+      },
     }),
     defineField({
       name: 'map',
