@@ -7,6 +7,7 @@ import {
   parseSanityDate,
   formatSanityDate,
   formatSanityDateTime,
+  shouldDesaturateItem,
 } from '@/lib/utils';
 import { compareAsc } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
@@ -19,8 +20,18 @@ interface ItinerarySectionProps {
 export default function ItinerarySection({ itinerary }: ItinerarySectionProps) {
   const [currentStickyDate, setCurrentStickyDate] = useState<string>('');
   const [showSticky, setShowSticky] = useState(false);
+  const [, forceUpdate] = useState({});
   const containerRef = useRef<HTMLDivElement>(null);
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
+
+  // Force re-render every minute to update desaturation effects
+  useEffect(() => {
+    const interval = setInterval(() => {
+      forceUpdate({});
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   function organizeItinerary(items: Array<{ date?: string } & ItineraryItem>) {
     // Filter out items without dates and sort by date
@@ -199,7 +210,11 @@ export default function ItinerarySection({ itinerary }: ItinerarySectionProps) {
                 {groupedByDate[date].map((item, index) => (
                   <div
                     key={`${item.date}-${index}`}
-                    className='bg-white rounded-lg shadow-lg overflow-hidden relative transition-transform duration-200 hover:scale-105'
+                    className={`bg-white rounded-lg shadow-lg overflow-hidden relative transition-transform duration-200 hover:scale-105 ${
+                      item.date && shouldDesaturateItem(item.date)
+                        ? 'grayscale'
+                        : ''
+                    }`}
                   >
                     {item.date && (
                       <div className='absolute top-4 left-4 z-10 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg'>

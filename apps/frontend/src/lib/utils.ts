@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { parseISO, isValid, format } from 'date-fns';
+import { parseISO, isValid, format, addMinutes, isAfter } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 
 export function cn(...inputs: ClassValue[]) {
@@ -45,4 +45,15 @@ export function formatSanityDate(dateString: string): string {
   if (!isValid(date)) return '';
 
   return format(date, 'EEEE, MMMM d, yyyy');
+}
+
+// Check if an itinerary item should be desaturated (15+ minutes after start time)
+export function shouldDesaturateItem(itemDate: string): boolean {
+  const itemStartTime = parseSanityDate(itemDate);
+  if (!itemStartTime) return false;
+
+  const currentTime = new Date();
+  const fifteenMinutesAfterStart = addMinutes(itemStartTime, 15);
+
+  return isAfter(currentTime, fifteenMinutesAfterStart);
 }
