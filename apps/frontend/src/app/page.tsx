@@ -2,6 +2,7 @@ import { sanityFetch } from '@/lib/sanity/live';
 import Image from 'next/image';
 import { urlFor } from '@/lib/sanity/client';
 import { ItineraryItem } from '@/lib/sanity/sanity.types';
+import { formatSanityDateTime, formatSanityDate } from '@/lib/utils';
 
 async function fetchPageData() {
   return await sanityFetch({
@@ -20,12 +21,25 @@ export default async function Home() {
         (item): item is { date: string } & ItineraryItem =>
           item.date !== undefined
       )
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .sort((a, b) => {
+        // Parse dates as UTC for consistent sorting
+        const dateA = new Date(
+          a.date.endsWith('Z') ? a.date : a.date + 'Z'
+        ).getTime();
+        const dateB = new Date(
+          b.date.endsWith('Z') ? b.date : b.date + 'Z'
+        ).getTime();
+        return dateA - dateB;
+      });
 
     // Group items by date
     const groupedByDate = itemsWithDates.reduce(
       (acc, item) => {
-        const dateKey = new Date(item.date).toDateString(); // Use date string for grouping
+        // Parse date as UTC for consistent grouping
+        const utcDate = new Date(
+          item.date.endsWith('Z') ? item.date : item.date + 'Z'
+        );
+        const dateKey = utcDate.toDateString(); // Use date string for grouping
         if (!acc[dateKey]) {
           acc[dateKey] = [];
         }
@@ -37,9 +51,16 @@ export default async function Home() {
 
     // Sort items within each date by time
     Object.keys(groupedByDate).forEach((dateKey) => {
-      groupedByDate[dateKey].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
+      groupedByDate[dateKey].sort((a, b) => {
+        // Parse dates as UTC for consistent sorting
+        const dateA = new Date(
+          a.date.endsWith('Z') ? a.date : a.date + 'Z'
+        ).getTime();
+        const dateB = new Date(
+          b.date.endsWith('Z') ? b.date : b.date + 'Z'
+        ).getTime();
+        return dateA - dateB;
+      });
     });
 
     return {
@@ -82,61 +103,50 @@ export default async function Home() {
           {sortedDates.map((date) => (
             <div key={date} className='mb-16'>
               <h2 className='text-3xl font-parisienne text-indigo-600 mb-8'>
-                {new Date(date).toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {formatSanityDate(date)}
               </h2>
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-                {groupedByDate[date].map((item, index) => {
-                  return (
-                    <div
-                      key={`${item.date}-${index}`}
-                      className='bg-white rounded-lg shadow-lg overflow-hidden relative'
-                    >
-                      {item.date && (
-                        <div className='absolute top-4 left-4 z-10 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg'>
-                          {new Date(item.date).toLocaleTimeString('en-US', {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true,
-                          })}
-                        </div>
-                      )}
-                      {item.image && item.image.asset && (
-                        <div className='relative h-48'>
-                          <Image
-                            src={urlFor(item.image.asset).url()}
-                            alt={item.title || 'Itinerary item'}
-                            fill
-                            className='object-cover'
-                          />
-                        </div>
-                      )}
-                      <div className='p-6'>
-                        <h3 className='text-xl font-semibold mb-2 text-indigo-950'>
-                          {item.title}
-                        </h3>
-                        <p className='text-gray-600 mb-2'>{item.description}</p>
-                        {item.map && (
-                          <p className='text-sm text-gray-500'>
-                            📍{' '}
-                            <a
-                              href={`https://maps.google.com/maps?q=${item.map.lat},${item.map.lng}`}
-                              target='_blank'
-                              rel='noopener noreferrer'
-                              className='underline hover:text-indigo-600'
-                            >
-                              Open in Google Maps
-                            </a>
-                          </p>
-                        )}
+                {groupedByDate[date].map((item, index) => (
+                  <div
+                    key={`${item.date}-${index}`}
+                    className='bg-white rounded-lg shadow-lg overflow-hidden relative'
+                  >
+                    {item.date && (
+                      <div className='absolute top-4 left-4 z-10 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg'>
+                        {formatSanityDateTime(item.date)}
                       </div>
+                    )}
+                    {item.image && item.image.asset && (
+                      <div className='relative h-48'>
+                        <Image
+                          src={urlFor(item.image.asset).url()}
+                          alt={item.title || 'Itinerary item'}
+                          fill
+                          className='object-cover'
+                        />
+                      </div>
+                    )}
+                    <div className='p-6'>
+                      <h3 className='text-xl font-semibold mb-2 text-indigo-950'>
+                        {item.title}
+                      </h3>
+                      <p className='text-gray-600 mb-2'>{item.description}</p>
+                      {item.map && (
+                        <p className='text-sm text-gray-500'>
+                          📍{' '}
+                          <a
+                            href={`https://maps.google.com/maps?q=${item.map.lat},${item.map.lng}`}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='underline hover:text-indigo-600'
+                          >
+                            Open in Google Maps
+                          </a>
+                        </p>
+                      )}
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </div>
           ))}
