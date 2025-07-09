@@ -178,7 +178,7 @@ export default function ItinerarySection({ itinerary }: ItinerarySectionProps) {
         }`}
       >
         <div className='container mx-auto max-w-6xl px-4 py-4'>
-          <h2 className='text-2xl font-parisienne text-indigo-600'>
+          <h2 className='text-lg font-sans font-bold text-indigo-600'>
             {currentStickyDate ? formatSanityDate(currentStickyDate) : ''}
           </h2>
         </div>
@@ -190,7 +190,7 @@ export default function ItinerarySection({ itinerary }: ItinerarySectionProps) {
           {sortedDates.map((date) => (
             <div key={date} className='mb-16'>
               <h2
-                className='date-header text-3xl font-parisienne text-indigo-600 mb-8'
+                className='date-header text-xl font-sans font-bold text-indigo-600 mb-8'
                 data-date={date}
               >
                 {formatSanityDate(date)}
