@@ -34,7 +34,7 @@ export default async function Home() {
         return compareAsc(dateA, dateB);
       });
 
-    // Group items by date in LA timezone
+    // Group items by date in LA timezone (only convert once here)
     const groupedByDate = itemsWithDates.reduce(
       (acc, item) => {
         const date = parseSanityDate(item.date);

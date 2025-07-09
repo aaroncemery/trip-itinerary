@@ -39,10 +39,10 @@ export function formatSanityDateTime(dateString: string): string {
 
 // Replace your formatSanityDate
 export function formatSanityDate(dateString: string): string {
-  const date = parseSanityDate(dateString);
-  if (!date) return '';
+  // For date headers, we just need to format the date string that's already converted
+  // The dateString here is already a toDateString() result from the grouping
+  const date = new Date(dateString);
+  if (!isValid(date)) return '';
 
-  const userTimezone = 'America/Los_Angeles'; // or get dynamically
-  const localDate = toZonedTime(date, userTimezone);
-  return format(localDate, 'EEEE, MMMM d, yyyy');
+  return format(date, 'EEEE, MMMM d, yyyy');
 }
