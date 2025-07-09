@@ -96,26 +96,38 @@ export default function ItinerarySection({ itinerary }: ItinerarySectionProps) {
 
         // Find the current section based on scroll position
         let currentDate = '';
+        let shouldShowSticky = false;
 
+        // Always find the most recent header that has scrolled past the top
         for (const entry of sortedHeaders) {
           const rect = entry.boundingClientRect;
           const dateKey = entry.target.getAttribute('data-date');
 
           if (!dateKey) continue;
 
-          // If header is visible and near the top, no sticky needed
-          if (entry.isIntersecting && rect.top >= 0 && rect.top <= 100) {
-            currentDate = '';
-            setShowSticky(false);
-            break;
-          }
-
           // If header has passed the top, this should be our sticky date
           if (rect.top <= 0) {
             currentDate = dateKey;
-            setShowSticky(true);
+            shouldShowSticky = true;
           }
         }
+
+        // Only hide sticky if the current section's header is very close to the top
+        const currentSectionHeader = sortedHeaders.find(
+          (entry) => entry.target.getAttribute('data-date') === currentDate
+        );
+
+        if (
+          currentSectionHeader &&
+          currentSectionHeader.isIntersecting &&
+          currentSectionHeader.boundingClientRect.top >= -10 &&
+          currentSectionHeader.boundingClientRect.top <= 50
+        ) {
+          shouldShowSticky = false;
+          currentDate = '';
+        }
+
+        setShowSticky(shouldShowSticky);
 
         setCurrentStickyDate(currentDate);
       },
