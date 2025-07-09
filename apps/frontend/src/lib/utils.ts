@@ -1,51 +1,48 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { parseISO, isValid, format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/**
- * Formats a datetime string from Sanity as local time
- * Sanity stores datetime in UTC, so we need to parse it as UTC and convert to local
- */
-export function formatSanityDateTime(
-  dateString: string,
-  options?: Intl.DateTimeFormatOptions
-) {
-  if (!dateString) return '';
-  // log out date to see if it's in UTC
-  console.log('dateString', dateString);
+// Helper to parse different date formats from Sanity
+export function parseSanityDate(dateString: string): Date | null {
+  if (!dateString) return null;
+
+  // Try parsing as ISO first (handles "2025-07-10T21:28:00.000Z")
+  if (dateString.includes('T') || dateString.includes('-')) {
+    const isoDate = parseISO(dateString);
+    if (isValid(isoDate)) return isoDate;
+  }
+
+  // Fall back to native Date parsing for formats like "Thu Jul 10 2025"
   const date = new Date(dateString);
-  if (isNaN(date.getTime())) return '';
-  const defaultOptions: Intl.DateTimeFormatOptions = {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'America/Los_Angeles', // <--- Force UTC!
-    ...options,
-  };
-  return date.toLocaleTimeString('en-US', defaultOptions);
+  return isValid(date) ? date : null;
 }
 
-/**
- * Formats a date string from Sanity for display
- * Sanity stores datetime in UTC, so we need to parse it as UTC
- */
-export function formatSanityDate(
-  dateString: string,
-  options?: Intl.DateTimeFormatOptions
-) {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return '';
-  const defaultOptions: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'America/Los_Angeles', // <--- Force UTC!
-    ...options,
-  };
-  return date.toLocaleDateString('en-US', defaultOptions);
+// Replace your formatSanityDateTime
+export function formatSanityDateTime(dateString: string): string {
+  const date = parseSanityDate(dateString);
+  if (!date) return '';
+
+  // Only format if it actually has time info
+  if (!dateString.includes('T') && !dateString.includes(':')) {
+    return '';
+  }
+
+  const userTimezone = 'America/Los_Angeles'; // or get dynamically
+  const localDate = toZonedTime(date, userTimezone);
+  return format(localDate, 'h:mm a');
+}
+
+// Replace your formatSanityDate
+export function formatSanityDate(dateString: string): string {
+  const date = parseSanityDate(dateString);
+  if (!date) return '';
+
+  const userTimezone = 'America/Los_Angeles'; // or get dynamically
+  const localDate = toZonedTime(date, userTimezone);
+  return format(localDate, 'EEEE, MMMM d, yyyy');
 }

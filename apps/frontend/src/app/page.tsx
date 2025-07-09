@@ -2,7 +2,12 @@ import { sanityFetch } from '@/lib/sanity/live';
 import Image from 'next/image';
 import { urlFor } from '@/lib/sanity/client';
 import { ItineraryItem } from '@/lib/sanity/sanity.types';
-import { formatSanityDateTime, formatSanityDate } from '@/lib/utils';
+import {
+  parseSanityDate,
+  formatSanityDate,
+  formatSanityDateTime,
+} from '@/lib/utils';
+import { compareAsc } from 'date-fns';
 
 async function fetchPageData() {
   return await sanityFetch({
@@ -22,24 +27,19 @@ export default async function Home() {
           item.date !== undefined
       )
       .sort((a, b) => {
-        // Parse dates as UTC for consistent sorting
-        const dateA = new Date(
-          a.date.endsWith('Z') ? a.date : a.date + 'Z'
-        ).getTime();
-        const dateB = new Date(
-          b.date.endsWith('Z') ? b.date : b.date + 'Z'
-        ).getTime();
-        return dateA - dateB;
+        const dateA = parseSanityDate(a.date);
+        const dateB = parseSanityDate(b.date);
+        if (!dateA || !dateB) return 0;
+        return compareAsc(dateA, dateB);
       });
 
     // Group items by date
     const groupedByDate = itemsWithDates.reduce(
       (acc, item) => {
-        // Parse date as UTC for consistent grouping
-        const utcDate = new Date(
-          item.date.endsWith('Z') ? item.date : item.date + 'Z'
-        );
-        const dateKey = utcDate.toDateString(); // Use date string for grouping
+        const date = parseSanityDate(item.date);
+        if (!date) return acc;
+
+        const dateKey = date.toDateString(); // Use date string for grouping
         if (!acc[dateKey]) {
           acc[dateKey] = [];
         }
@@ -52,21 +52,17 @@ export default async function Home() {
     // Sort items within each date by time
     Object.keys(groupedByDate).forEach((dateKey) => {
       groupedByDate[dateKey].sort((a, b) => {
-        // Parse dates as UTC for consistent sorting
-        const dateA = new Date(
-          a.date.endsWith('Z') ? a.date : a.date + 'Z'
-        ).getTime();
-        const dateB = new Date(
-          b.date.endsWith('Z') ? b.date : b.date + 'Z'
-        ).getTime();
-        return dateA - dateB;
+        const dateA = parseSanityDate(a.date);
+        const dateB = parseSanityDate(b.date);
+        if (!dateA || !dateB) return 0;
+        return compareAsc(dateA, dateB);
       });
     });
 
     return {
       groupedByDate,
-      sortedDates: Object.keys(groupedByDate).sort(
-        (a, b) => new Date(a).getTime() - new Date(b).getTime()
+      sortedDates: Object.keys(groupedByDate).sort((a, b) =>
+        compareAsc(new Date(a), new Date(b))
       ),
     };
   }
@@ -122,6 +118,7 @@ export default async function Home() {
                           src={urlFor(item.image.asset).url()}
                           alt={item.title || 'Itinerary item'}
                           fill
+                          sizes='300px'
                           className='object-cover'
                         />
                       </div>
