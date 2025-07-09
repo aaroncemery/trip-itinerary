@@ -14,32 +14,15 @@ export function formatSanityDateTime(
   options?: Intl.DateTimeFormatOptions
 ) {
   if (!dateString) return '';
-
-  try {
-    // Parse the date string as UTC (since Sanity stores in UTC)
-    // If the string already ends with 'Z', don't add another one
-    const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
-    const utcDate = new Date(utcString);
-
-    // Check if the date is valid
-    if (isNaN(utcDate.getTime())) {
-      console.warn('Invalid date string:', dateString);
-      return '';
-    }
-
-    // Format with default options if none provided
-    const defaultOptions: Intl.DateTimeFormatOptions = {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      ...options,
-    };
-
-    return utcDate.toLocaleTimeString('en-US', defaultOptions);
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return '';
-  }
+  const date = new Date(dateString); // No 'Z' appended!
+  if (isNaN(date.getTime())) return '';
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    ...options,
+  };
+  return date.toLocaleTimeString('en-US', defaultOptions);
 }
 
 /**
@@ -51,31 +34,14 @@ export function formatSanityDate(
   options?: Intl.DateTimeFormatOptions
 ) {
   if (!dateString) return '';
-
-  try {
-    // Parse the date string as UTC (since Sanity stores in UTC)
-    // If the string already ends with 'Z', don't add another one
-    const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
-    const utcDate = new Date(utcString);
-
-    // Check if the date is valid
-    if (isNaN(utcDate.getTime())) {
-      console.warn('Invalid date string:', dateString);
-      return '';
-    }
-
-    // Format with default options if none provided
-    const defaultOptions: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      ...options,
-    };
-
-    return utcDate.toLocaleDateString('en-US', defaultOptions);
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return '';
-  }
+  const date = new Date(dateString); // No 'Z' appended!
+  if (isNaN(date.getTime())) return '';
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    ...options,
+  };
+  return date.toLocaleDateString('en-US', defaultOptions);
 }
